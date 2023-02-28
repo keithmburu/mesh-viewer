@@ -1,10 +1,11 @@
 //--------------------------------------------------
-// Author:
-// Date:
+// Author: Keith Mburu
+// Date: 2/25/2023
 // Description: Loads PLY files in ASCII format
 //--------------------------------------------------
 
 #include "plymesh.h"
+#include <fstream>
 
 using namespace std;
 using namespace glm;
@@ -31,24 +32,90 @@ namespace agl {
          std::cout << "WARNING: Cannot load different files with the same PLY mesh\n";
          return false;
       }
-      // todo: your code here
-      return false;
+      std::ifstream file(filename);
+      if (!file) {
+         return false;
+      } else {
+         std::string buffer;
+         std::getline(file, buffer);
+         if (buffer != "ply") {
+            return false;
+         } else {
+            int numVertices, numPolygons;
+            int numVerticesIdx = 15, numPolygonsIdx = 13;
+            while (std::getline(file, buffer)) {
+               if (buffer.find("element vertex") != std::string::npos) {
+                  numVertices = std::stoi(buffer.substr(numVerticesIdx));
+               } else if (buffer.find("element face") != std::string::npos) {
+                  // cout << buffer << endl;
+                  numPolygons = std::stoi(buffer.substr(numPolygonsIdx));
+               } else if (buffer.find("end_header") != std::string::npos) {
+                  // cout << buffer << endl;
+                  break;
+               }
+            }
+            for (int i = numVertices; i > 0; i--) {
+               std::getline(file, buffer);
+               // cout << buffer << endl;
+               int begin = 0;
+               int end = buffer.find(" ", begin);
+               for (int j = 1; j <= 3; j++) {
+                  // cout << begin << " " << end << " " << buffer.substr(begin, 8) << endl;
+                  _positions.push_back(stof(buffer.substr(begin, end - begin)));
+                  begin = end + 1;
+                  end = buffer.find(" ", begin);
+               }
+            }
+            for (int i = numPolygons; i > 0; i--) {
+               std::getline(file, buffer);
+               // cout << buffer << endl;
+               int begin = 0;
+               int end = buffer.find(" ", begin);
+               int vertexCount = 0;
+               for (int j = 1; j <= 4; j++) {
+                  // cout << begin << " " << end << " " << buffer.substr(begin, 1) << endl;
+                  if (!vertexCount) {
+                     vertexCount = stoi(buffer.substr(begin, end - begin));
+                  } else {
+                     _faces.push_back(stoi(buffer.substr(begin, end - begin)));
+                  }
+                  begin = end + 1;
+                  end = buffer.find(" ", begin);
+               }
+            }
+            return true;
+         }
+      }
    }
 
    glm::vec3 PLYMesh::minBounds() const {
-      return glm::vec3(0);
+      float minX, minY, minZ;
+      minX = minY = minZ = 999999;
+      for (int i = 0; i < _positions.size(); i += 3) {
+         minX = std::min(minX, _positions[i]);
+         minY = std::min(minY, _positions[i + 1]);
+         minZ = std::min(minZ, _positions[i + 2]);
+      }
+      return glm::vec3(minX, minY, minZ);
    }
 
-   glm::vec3 PLYMesh::maxBounds() const {
-      return glm::vec3(0);
+   glm::vec3 PLYMesh::maxBounds() const { 
+      float maxX, maxY, maxZ;
+      maxX = maxY = maxZ = 0;
+      for (int i = 0; i < _positions.size(); i += 3) {
+         maxX = std::max(maxX, _positions[i]);
+         maxY = std::max(maxY, _positions[i + 1]);
+         maxZ = std::max(maxZ, _positions[i + 2]);
+      }
+      return glm::vec3(maxX, maxY, maxZ);
    }
 
    int PLYMesh::numVertices() const {
-      return _positions.size();
+      return _positions.size() / 3;
    }
 
    int PLYMesh::numTriangles() const {
-      return _faces.size();
+      return _faces.size() / 3;
    }
 
    const std::vector<GLfloat>& PLYMesh::positions() const {

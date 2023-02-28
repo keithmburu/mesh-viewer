@@ -1,6 +1,6 @@
 //--------------------------------------------------
-// Author:
-// Date:
+// Author: Keith Mburu
+// Date: 2/25/2023
 // Description: Loads PLY files in ASCII format
 //--------------------------------------------------
 
@@ -36,7 +36,7 @@ namespace agl {
       // Positions in this model
       const std::vector<GLfloat>& positions() const;
 
-      // Positions in this model
+      // Normals in this model
       const std::vector<GLfloat>& normals() const;
 
       // Return number of faces in this model
