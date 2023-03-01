@@ -23,6 +23,10 @@ public:
    }
 
    void setup() {
+       renderer.loadShader("normals", "../shaders/normals.vs", "../shaders/normals.fs");
+       renderer.loadShader("phong-vertex", "../shaders/phong-vertex.vs", "../shaders/phong-vertex.fs");
+       renderer.loadShader("phong-pixel", "../shaders/phong-pixel.vs", "../shaders/phong-pixel.fs");
+
       _mesh = PLYMesh("../models/cube.ply");
    }
 
@@ -58,10 +62,8 @@ public:
    }
 
    void scroll(float dx, float dy) {
-      _radius += dy;
-      if (_radius > viewVolumeSide) {
-         _radius = viewVolumeSide;
-      } else if (_radius < 1) {
+      _radius -= dy;
+      if (_radius < 1) {
          _radius = 1;
       }
       _azimuth += dx * (M_PI / 180);
@@ -86,7 +88,7 @@ public:
             }
             cout << "Previous model " << _fileNames[_currentFileIdx] << endl;
          }
-         _radius = 10.0f;
+         _radius = _viewVolumeSide;
          _azimuth = M_PI;
          _elevation = 0;
          _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
@@ -94,16 +96,11 @@ public:
    }
 
    void draw() {
-      // renderer.beginShader("normals"); // activates shader with given name
+      renderer.beginShader("normals"); // activates shader with given name
 
       float aspect = ((float) width()) / height();
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
-      
-      float camPosX = _radius * sin(_azimuth) * cos(_elevation);
-      float camPosY = _radius * sin(_elevation);
-      float camPosZ = _radius * cos(_azimuth) * cos(_elevation);
-      _camPos = vec3(camPosX, camPosY, camPosZ);
-      renderer.lookAt(_camPos, _lookPos, _up);
+
 
       // renderer.rotate(vec3(0,0,90));
 
@@ -116,30 +113,36 @@ public:
       float centroidX = (minBounds[0] + maxBounds[0]) / 2.0f;
       float centroidY = (minBounds[1] + maxBounds[1]) / 2.0f;
       float centroidZ = (minBounds[2] + maxBounds[2]) / 2.0f;
-      renderer.translate(vec3(-centroidX, -centroidY, -centroidZ));
+      _lookPos = vec3(centroidX, centroidY, centroidZ);
+      float camPosX = _radius * sin(_azimuth) * cos(_elevation);
+      float camPosY = _radius * sin(_elevation);
+      float camPosZ = _radius * cos(_azimuth) * cos(_elevation);
+      _camPos = vec3(camPosX, camPosY, camPosZ);
+      renderer.lookAt(_camPos, _lookPos, _up);
+      // renderer.translate(vec3(-centroidX, -centroidY, -centroidZ));
       
-      float windowX = abs(minBounds[0] - centroidX) + (maxBounds[0] - centroidX);
-      float windowY = abs(minBounds[1] - centroidY) + (maxBounds[1] - centroidY);
-      float windowZ = abs(minBounds[2] - centroidZ) + (maxBounds[2] - centroidZ);
-      float scaled = std::max(std::max(windowX, windowY), windowZ);
-      // cout << "scaled " << scaled << endl;
-      renderer.scale(vec3(viewVolumeSide / scaled, viewVolumeSide / scaled, viewVolumeSide / scaled));
+      // float windowX = abs(minBounds[0] - centroidX) + (maxBounds[0] - centroidX);
+      // float windowY = abs(minBounds[1] - centroidY) + (maxBounds[1] - centroidY);
+      // float windowZ = abs(minBounds[2] - centroidZ) + (maxBounds[2] - centroidZ);
+      // float maxDimension = std::max(std::max(windowX, windowY), windowZ);
+      // // cout << "maxDimension " << maxDimension << endl;
+      // renderer.scale(vec3(_viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension));
       renderer.mesh(_mesh);
       // renderer.cube(); // for debugging!
 
-      // renderer.endShader();
+      renderer.endShader();
    }
 
 protected:
    PLYMesh _mesh;
-   float _radius = 10.0f;
+   int _viewVolumeSide = 10;
+   float _radius = _viewVolumeSide;
    float _azimuth = M_PI;
    float _elevation = 0;
    vec3 _camPos;
    vec3 _lookPos = vec3(0, 0, 0);
    vec3 _up = vec3(0, 1, 0);
    bool _leftClick = false;
-   int viewVolumeSide = 10;
    vector<string> _fileNames;
    int _currentFileIdx;
 };

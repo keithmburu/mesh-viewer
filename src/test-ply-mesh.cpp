@@ -25,13 +25,13 @@ int main() {
       std::cout << vec3(x,y,z) << std::endl;
    }
 
-   // std::cout << std::endl << "Normals: " << std::endl;
-   // for (int i = 0; i < mesh.numVertices() * 3; i += 3) {
-   //    float x = mesh.normals()[i + 0];
-   //    float y = mesh.normals()[i + 1];
-   //    float z = mesh.normals()[i + 2];
-   //    std::cout << vec3(x,y,z) << std::endl;
-   // }
+   std::cout << std::endl << "Normals: " << std::endl;
+   for (int i = 0; i < mesh.numVertices() * 3; i += 3) {
+      float x = mesh.normals()[i + 0];
+      float y = mesh.normals()[i + 1];
+      float z = mesh.normals()[i + 2];
+      std::cout << vec3(x,y,z) << std::endl;
+   }
 
    std::cout << std::endl << "Indices: " << std::endl;
    for (int i = 0; i < mesh.numTriangles() * 3; i += 3) {
