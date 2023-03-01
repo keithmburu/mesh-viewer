@@ -101,7 +101,6 @@ public:
       float aspect = ((float) width()) / height();
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
 
-
       // renderer.rotate(vec3(0,0,90));
 
       vec3 minBounds = _mesh.minBounds();
@@ -110,23 +109,24 @@ public:
       // cout << "y " << minBounds[1] << " " << maxBounds[1] << endl;
       // cout << "z " << minBounds[2] << " " << maxBounds[2] << endl;
 
+      float windowX = abs(minBounds[0]) + (maxBounds[0]);
+      float windowY = abs(minBounds[1]) + (maxBounds[1]);
+      float windowZ = abs(minBounds[2]) + (maxBounds[2]);
+      float maxDimension = std::max(std::max(windowX, windowY), windowZ);
+      // cout << "maxDimension " << maxDimension << endl;
+      renderer.scale(vec3(_viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension));
+
       float centroidX = (minBounds[0] + maxBounds[0]) / 2.0f;
       float centroidY = (minBounds[1] + maxBounds[1]) / 2.0f;
       float centroidZ = (minBounds[2] + maxBounds[2]) / 2.0f;
-      _lookPos = vec3(centroidX, centroidY, centroidZ);
+      renderer.translate(vec3(-centroidX, -centroidY, -centroidZ));
+
       float camPosX = _radius * sin(_azimuth) * cos(_elevation);
       float camPosY = _radius * sin(_elevation);
       float camPosZ = _radius * cos(_azimuth) * cos(_elevation);
       _camPos = vec3(camPosX, camPosY, camPosZ);
       renderer.lookAt(_camPos, _lookPos, _up);
-      // renderer.translate(vec3(-centroidX, -centroidY, -centroidZ));
-      
-      // float windowX = abs(minBounds[0] - centroidX) + (maxBounds[0] - centroidX);
-      // float windowY = abs(minBounds[1] - centroidY) + (maxBounds[1] - centroidY);
-      // float windowZ = abs(minBounds[2] - centroidZ) + (maxBounds[2] - centroidZ);
-      // float maxDimension = std::max(std::max(windowX, windowY), windowZ);
-      // // cout << "maxDimension " << maxDimension << endl;
-      // renderer.scale(vec3(_viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension));
+
       renderer.mesh(_mesh);
       // renderer.cube(); // for debugging!
 
