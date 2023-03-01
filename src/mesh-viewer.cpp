@@ -18,8 +18,15 @@ using namespace agl;
 class MeshViewer : public Window {
 public:
    MeshViewer() : Window() {
+      _radius = _viewVolumeSide = 10;
+      _azimuth = 0;
+      _elevation = 0;
+      _lookPos = vec3(0, 0, 0);
+      _up = vec3(0, 1, 0);
+      _leftClick = false;
       _fileNames = GetFilenamesInDir("../models", "ply");
       _currentFileIdx = 0;
+      _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
    }
 
    void setup() {
@@ -27,22 +34,27 @@ public:
        renderer.loadShader("phong-vertex", "../shaders/phong-vertex.vs", "../shaders/phong-vertex.fs");
        renderer.loadShader("phong-pixel", "../shaders/phong-pixel.vs", "../shaders/phong-pixel.fs");
 
-      _mesh = PLYMesh("../models/cube.ply");
+       renderer.loadShader("billboard", "../shaders/billboard.vs", "../shaders/billboard.fs");
+       renderer.loadShader("cubemap", "../shaders/cubemap.vs", "../shaders/cubemap.fs");
+       renderer.loadShader("lines", "../shaders/lines.vs", "../shaders/lines.fs");
+       renderer.loadShader("text", "../shaders/text.vs", "../shaders/text.fs");
+       renderer.loadShader("unlit", "../shaders/unlit.vs", "../shaders/unlit.fs");
    }
 
    void mouseMotion(int x, int y, int dx, int dy) {
       if (_leftClick) {
+         int ONE_DEG = 0.017;
          _elevation += dy * (M_PI / 180);
-         if (_elevation >= M_PI / 2) {
-            _elevation = M_PI / 2;
-         } else if (_elevation < -M_PI / 2) {
-            _elevation = -M_PI / 2;
+         if (_elevation > (M_PI / 2) - ONE_DEG) {
+            _elevation = (M_PI / 2) - ONE_DEG;
+         } else if (_elevation < -((M_PI / 2) - ONE_DEG)) {
+            _elevation = -((M_PI / 2) - ONE_DEG);
          }
          _azimuth -= dx * (M_PI / 180);
          if (_azimuth > 2 * M_PI) {
-            _azimuth = 2 * M_PI;
-         } else if (_azimuth < 0) {
             _azimuth = 0;
+         } else if (_azimuth < 0) {
+            _azimuth = 2 * M_PI;
          }
          // cout << "elevation " << _elevation << endl;
          // cout << "azimuth " << _azimuth << endl;
@@ -68,9 +80,9 @@ public:
       }
       _azimuth += dx * (M_PI / 180);
       if (_azimuth > 2 * M_PI) {
-         _azimuth = 2 * M_PI;
-      } else if (_azimuth < 0) {
          _azimuth = 0;
+      } else if (_azimuth < 0) {
+         _azimuth = 2 * M_PI;
       }
       // cout << "radius " << _radius << endl;
       // cout << "azimuth " << _azimuth << endl;
@@ -89,7 +101,7 @@ public:
             cout << "Previous model " << _fileNames[_currentFileIdx] << endl;
          }
          _radius = _viewVolumeSide;
-         _azimuth = M_PI;
+         _azimuth = 0;
          _elevation = 0;
          _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
       }
@@ -97,6 +109,13 @@ public:
 
    void draw() {
       renderer.beginShader("normals"); // activates shader with given name
+      // renderer.beginShader("phong-vertex"); // activates shader with given name
+      // renderer.beginShader("phong-pixel"); // activates shader with given name
+      // renderer.beginShader("billboard"); // activates shader with given name
+      // renderer.beginShader("lines"); // activates shader with given name
+      // renderer.beginShader("cubemap"); // activates shader with given name
+      // renderer.beginShader("text"); // activates shader with given name
+      // renderer.beginShader("unlit"); // activates shader with given name
 
       float aspect = ((float) width()) / height();
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
@@ -135,14 +154,14 @@ public:
 
 protected:
    PLYMesh _mesh;
-   int _viewVolumeSide = 10;
-   float _radius = _viewVolumeSide;
-   float _azimuth = M_PI;
-   float _elevation = 0;
+   int _viewVolumeSide;
+   float _radius;
+   float _azimuth;
+   float _elevation;
    vec3 _camPos;
-   vec3 _lookPos = vec3(0, 0, 0);
-   vec3 _up = vec3(0, 1, 0);
-   bool _leftClick = false;
+   vec3 _lookPos;
+   vec3 _up;
+   bool _leftClick;
    vector<string> _fileNames;
    int _currentFileIdx;
 };
