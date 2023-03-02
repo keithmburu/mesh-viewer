@@ -1,7 +1,7 @@
 //--------------------------------------------------
 // Author: Keith Mburu
 // Date: 2/25/2023
-// Description: Loads PLY files in ASCII format
+// Description: Visualizes triangle meshes interactively in 3D
 //--------------------------------------------------
 
 #include <cmath>
@@ -24,40 +24,45 @@ public:
       _lookPos = vec3(0, 0, 0);
       _up = vec3(0, 1, 0);
       _leftClick = false;
+      _shiftKeysPressed = 0;
       _fileNames = GetFilenamesInDir("../models", "ply");
       _currentFileIdx = 0;
       _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
    }
 
    void setup() {
-       renderer.loadShader("normals", "../shaders/normals.vs", "../shaders/normals.fs");
-       renderer.loadShader("phong-vertex", "../shaders/phong-vertex.vs", "../shaders/phong-vertex.fs");
-       renderer.loadShader("phong-pixel", "../shaders/phong-pixel.vs", "../shaders/phong-pixel.fs");
+      renderer.loadShader("normals", "../shaders/normals.vs", "../shaders/normals.fs");
+      //  renderer.loadShader("phong-vertex", "../shaders/phong-vertex.vs", "../shaders/phong-vertex.fs");
+      //  renderer.loadShader("phong-pixel", "../shaders/phong-pixel.vs", "../shaders/phong-pixel.fs");
 
-       renderer.loadShader("billboard", "../shaders/billboard.vs", "../shaders/billboard.fs");
-       renderer.loadShader("cubemap", "../shaders/cubemap.vs", "../shaders/cubemap.fs");
-       renderer.loadShader("lines", "../shaders/lines.vs", "../shaders/lines.fs");
-       renderer.loadShader("text", "../shaders/text.vs", "../shaders/text.fs");
-       renderer.loadShader("unlit", "../shaders/unlit.vs", "../shaders/unlit.fs");
+      //  renderer.loadShader("billboard", "../shaders/billboard.vs", "../shaders/billboard.fs");
+      //  renderer.loadShader("cubemap", "../shaders/cubemap.vs", "../shaders/cubemap.fs");
+      //  renderer.loadShader("lines", "../shaders/lines.vs", "../shaders/lines.fs");
+      //  renderer.loadShader("text", "../shaders/text.vs", "../shaders/text.fs");
+      //  renderer.loadShader("unlit", "../shaders/unlit.vs", "../shaders/unlit.fs");
    }
 
    void mouseMotion(int x, int y, int dx, int dy) {
       if (_leftClick) {
-         int ONE_DEG = 0.017;
-         _elevation += dy * (M_PI / 180);
-         if (_elevation > (M_PI / 2) - ONE_DEG) {
-            _elevation = (M_PI / 2) - ONE_DEG;
-         } else if (_elevation < -((M_PI / 2) - ONE_DEG)) {
-            _elevation = -((M_PI / 2) - ONE_DEG);
+         if (_shiftKeysPressed) {
+            scroll(dx, dy); // zoom in or out
+         } else {
+            float ONE_DEG = 0.017; // one degree in radians
+            _elevation += dy * (M_PI / 180);
+            if (_elevation > (M_PI / 2) - ONE_DEG) {
+               _elevation = (M_PI / 2) - ONE_DEG;
+            } else if (_elevation < -((M_PI / 2) - ONE_DEG)) {
+               _elevation = -((M_PI / 2) - ONE_DEG);
+            }
+            _azimuth -= dx * (M_PI / 180);
+            if (_azimuth > 2 * M_PI) {
+               _azimuth = 0;
+            } else if (_azimuth < 0) {
+               _azimuth = 2 * M_PI;
+            }
+            // cout << "elevation " << _elevation << endl;
+            // cout << "azimuth " << _azimuth << endl;
          }
-         _azimuth -= dx * (M_PI / 180);
-         if (_azimuth > 2 * M_PI) {
-            _azimuth = 0;
-         } else if (_azimuth < 0) {
-            _azimuth = 2 * M_PI;
-         }
-         // cout << "elevation " << _elevation << endl;
-         // cout << "azimuth " << _azimuth << endl;
       }
    }
 
@@ -88,6 +93,12 @@ public:
       // cout << "azimuth " << _azimuth << endl;
    }
 
+   void keyDown(int key, int mods) {
+      if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {
+         _shiftKeysPressed++;
+      }
+   }
+
    void keyUp(int key, int mods) {
       if (key == GLFW_KEY_N || key == GLFW_KEY_P) {
          if (key == GLFW_KEY_N) {
@@ -104,6 +115,9 @@ public:
          _azimuth = 0;
          _elevation = 0;
          _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
+      } 
+      if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {
+         _shiftKeysPressed--;
       }
    }
 
@@ -119,6 +133,7 @@ public:
 
       float aspect = ((float) width()) / height();
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
+      // renderer.ortho(-5.0f, 5.0f, -5.0f, 5.0f, -5.0f, 5.0f);
 
       // renderer.rotate(vec3(0,0,90));
 
@@ -162,6 +177,7 @@ protected:
    vec3 _lookPos;
    vec3 _up;
    bool _leftClick;
+   int _shiftKeysPressed;
    vector<string> _fileNames;
    int _currentFileIdx;
 };
