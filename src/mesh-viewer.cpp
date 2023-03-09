@@ -23,16 +23,19 @@ public:
       _elevation = 0;
       _lookPos = vec3(0, 0, 0);
       _up = vec3(0, 1, 0);
+      _lightPos = vec3(_viewVolumeSide, _viewVolumeSide, _viewVolumeSide);
+      _lightColor = vec3(1.0, 1.0, 1.0);
       _leftClick = false;
       _shiftKeysPressed = 0;
       _fileNames = GetFilenamesInDir("../models", "ply");
       _currentFileIdx = 0;
+      cout << "Current model " << _fileNames[_currentFileIdx] << endl;
       _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
    }
 
    void setup() {
-      renderer.loadShader("normals", "../shaders/normals.vs", "../shaders/normals.fs");
-      //  renderer.loadShader("phong-vertex", "../shaders/phong-vertex.vs", "../shaders/phong-vertex.fs");
+      // renderer.loadShader("normals", "../shaders/normals.vs", "../shaders/normals.fs");
+      renderer.loadShader("phong-vertex", "../shaders/phong-vertex.vs", "../shaders/phong-vertex.fs");
       //  renderer.loadShader("phong-pixel", "../shaders/phong-pixel.vs", "../shaders/phong-pixel.fs");
 
       //  renderer.loadShader("billboard", "../shaders/billboard.vs", "../shaders/billboard.fs");
@@ -122,14 +125,29 @@ public:
    }
 
    void draw() {
-      renderer.beginShader("normals"); // activates shader with given name
-      // renderer.beginShader("phong-vertex"); // activates shader with given name
+      // renderer.beginShader("normals"); // activates shader with given name
+      renderer.beginShader("phong-vertex"); // activates shader with given name
       // renderer.beginShader("phong-pixel"); // activates shader with given name
       // renderer.beginShader("billboard"); // activates shader with given name
       // renderer.beginShader("lines"); // activates shader with given name
       // renderer.beginShader("cubemap"); // activates shader with given name
       // renderer.beginShader("text"); // activates shader with given name
       // renderer.beginShader("unlit"); // activates shader with given name
+
+      renderer.setUniform("ViewMatrix", renderer.viewMatrix());
+      renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
+
+      renderer.setUniform("lightPos", _lightPos.x, _lightPos.y, _lightPos.z);
+      renderer.setUniform("lightColor", _lightColor.x, _lightColor.y, _lightColor.z);
+      renderer.setUniform("eyePos", _camPos);
+
+      float ka = 0.1, kd = 0.7, ks = 0.6;
+      float phongExp = 50.0;
+
+      renderer.setUniform("ka", ka);
+      renderer.setUniform("kd", kd);
+      renderer.setUniform("ks", ks);
+      renderer.setUniform("phongExp", phongExp);
 
       float aspect = ((float) width()) / height();
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
@@ -176,6 +194,8 @@ protected:
    vec3 _camPos;
    vec3 _lookPos;
    vec3 _up;
+   vec3 _lightPos;
+   vec3 _lightColor;
    bool _leftClick;
    int _shiftKeysPressed;
    vector<string> _fileNames;
