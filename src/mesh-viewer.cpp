@@ -125,14 +125,15 @@ public:
    }
 
    void draw() {
-      // renderer.beginShader("normals"); // activates shader with given name
-      renderer.beginShader("phong-vertex"); // activates shader with given name
-      // renderer.beginShader("phong-pixel"); // activates shader with given name
-      // renderer.beginShader("billboard"); // activates shader with given name
-      // renderer.beginShader("lines"); // activates shader with given name
-      // renderer.beginShader("cubemap"); // activates shader with given name
-      // renderer.beginShader("text"); // activates shader with given name
-      // renderer.beginShader("unlit"); // activates shader with given name
+      // activates shader with given name
+      // renderer.beginShader("normals"); 
+      renderer.beginShader("phong-vertex"); 
+      // renderer.beginShader("phong-pixel"); 
+      // renderer.beginShader("billboard"); 
+      // renderer.beginShader("lines"); 
+      // renderer.beginShader("cubemap"); 
+      // renderer.beginShader("text");
+      // renderer.beginShader("unlit");
 
       renderer.setUniform("ViewMatrix", renderer.viewMatrix());
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
