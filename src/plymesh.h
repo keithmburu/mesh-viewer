@@ -44,6 +44,12 @@ namespace agl {
 
       // face indices in this model
       const std::vector<GLuint>& indices() const;
+      
+      // color components of each vertex in this model
+      const std::vector<GLfloat>& colors() const;
+
+      // texture coordinates of each vertex in this model
+      const std::vector<GLfloat>& uvs() const;
 
    protected:
       void init();
@@ -53,6 +59,8 @@ namespace agl {
       std::vector<GLfloat> _positions;
       std::vector<GLfloat> _normals;
       std::vector<GLuint> _faces;
+      std::vector<GLfloat> _colors;
+      std::vector<GLfloat> _uvs;
    };
 }
 

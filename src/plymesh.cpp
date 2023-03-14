@@ -12,7 +12,7 @@ using namespace glm;
 
 namespace agl {
 
-   PLYMesh::PLYMesh(const std::string& filename) {
+   PLYMesh::PLYMesh(const string& filename) {
       load(filename);
    }
 
@@ -27,7 +27,7 @@ namespace agl {
    PLYMesh::~PLYMesh() {
    }
 
-   bool PLYMesh::load(const std::string& filename) {
+   bool PLYMesh::load(const string& filename) {
       if (_positions.size() != 0) {
          std::cout << "WARNING: Cannot load different files with the same PLY mesh\n";
          return false;
@@ -36,7 +36,7 @@ namespace agl {
       if (!file) {
          return false;
       } else {
-         std::string buffer;
+         string buffer;
          std::getline(file, buffer);
          if (buffer != "ply") {
             return false;
@@ -44,12 +44,12 @@ namespace agl {
             int numVertices, numPolygons;
             int numVerticesIdx = 15, numPolygonsIdx = 13;
             while (std::getline(file, buffer)) {
-               if (buffer.find("element vertex") != std::string::npos) {
+               if (buffer.find("element vertex") != string::npos) {
                   numVertices = std::stoi(buffer.substr(numVerticesIdx));
-               } else if (buffer.find("element face") != std::string::npos) {
+               } else if (buffer.find("element face") != string::npos) {
                   // cout << buffer << endl;
                   numPolygons = std::stoi(buffer.substr(numPolygonsIdx));
-               } else if (buffer.find("end_header") != std::string::npos) {
+               } else if (buffer.find("end_header") != string::npos) {
                   // cout << buffer << endl;
                   break;
                }
@@ -63,8 +63,12 @@ namespace agl {
                   // cout << begin << " " << end << " " << buffer.substr(begin, 8) << endl;
                   if (j <= 3) {
                      _positions.push_back(stof(buffer.substr(begin, end - begin)));
-                  } else {
+                  } else if (j <= 6) {
                      _normals.push_back(stof(buffer.substr(begin, end - begin)));
+                  } else if (j <= 9) {
+                     _colors.push_back(stof(buffer.substr(begin, end - begin)));
+                  } else if (j <= 11) {
+                     _uvs.push_back(stof(buffer.substr(begin, end - begin)));
                   }
                   begin = end + 1;
                   end = buffer.find(" ", begin);
@@ -122,15 +126,23 @@ namespace agl {
       return _faces.size() / 3;
    }
 
-   const std::vector<GLfloat>& PLYMesh::positions() const {
+   const vector<GLfloat>& PLYMesh::positions() const {
       return _positions;
    }
 
-   const std::vector<GLfloat>& PLYMesh::normals() const {
+   const vector<GLfloat>& PLYMesh::normals() const {
       return _normals;
    }
 
-   const std::vector<GLuint>& PLYMesh::indices() const {
+   const vector<GLuint>& PLYMesh::indices() const {
       return _faces;
+   }
+
+   const vector<GLfloat>& PLYMesh::colors() const {
+      return _colors;
+   }
+
+   const vector<GLfloat>& PLYMesh::uvs() const {
+      return _uvs;
    }
 }

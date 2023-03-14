@@ -28,21 +28,17 @@ public:
       _leftClick = false;
       _shiftKeysPressed = 0;
       _fileNames = GetFilenamesInDir("../models", "ply");
-      _currentFileIdx = 0;
-      cout << "Current model " << _fileNames[_currentFileIdx] << endl;
+      _shaderNames = {"test", "unlit", "normals", "phong-vertex", "phong-pixel", "billboard", "cubemap", "lines", "text", "toon"};
+      _currentFileIdx = _currentShaderIdx = 0;
+      cout << "Current model: " << _fileNames[_currentFileIdx] << endl;
+      cout << "Current shader: " << _shaderNames[_currentShaderIdx] << endl;
       _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
    }
 
    void setup() {
-      // renderer.loadShader("normals", "../shaders/normals.vs", "../shaders/normals.fs");
-      renderer.loadShader("phong-vertex", "../shaders/phong-vertex.vs", "../shaders/phong-vertex.fs");
-      //  renderer.loadShader("phong-pixel", "../shaders/phong-pixel.vs", "../shaders/phong-pixel.fs");
-
-      //  renderer.loadShader("billboard", "../shaders/billboard.vs", "../shaders/billboard.fs");
-      //  renderer.loadShader("cubemap", "../shaders/cubemap.vs", "../shaders/cubemap.fs");
-      //  renderer.loadShader("lines", "../shaders/lines.vs", "../shaders/lines.fs");
-      //  renderer.loadShader("text", "../shaders/text.vs", "../shaders/text.fs");
-      //  renderer.loadShader("unlit", "../shaders/unlit.vs", "../shaders/unlit.fs");
+      for (string shaderName : _shaderNames) {
+         renderer.loadShader(shaderName, "../shaders/" + shaderName + ".vs", "../shaders/" + shaderName + ".fs");
+      }
    }
 
    void mouseMotion(int x, int y, int dx, int dy) {
@@ -106,19 +102,23 @@ public:
       if (key == GLFW_KEY_N || key == GLFW_KEY_P) {
          if (key == GLFW_KEY_N) {
             _currentFileIdx = (_currentFileIdx + 1) % _fileNames.size();
-            cout << "Next model " << _fileNames[_currentFileIdx] << endl;
+            cout << "Next model: " << _fileNames[_currentFileIdx] << endl;
          } else if (key == GLFW_KEY_P) {
             _currentFileIdx--;
             if (_currentFileIdx == -1) {
                _currentFileIdx = _fileNames.size() - 1;
             }
-            cout << "Previous model " << _fileNames[_currentFileIdx] << endl;
+            cout << "Previous model: " << _fileNames[_currentFileIdx] << endl;
          }
          _radius = _viewVolumeSide;
          _azimuth = 0;
          _elevation = 0;
          _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
-      } 
+      } else if (key == GLFW_KEY_S) {
+         _currentShaderIdx = (_currentShaderIdx + 1) % _shaderNames.size();
+         _currentShader = _shaderNames[_currentShaderIdx];
+         cout << "Next shader: " << _currentShader << endl;
+      }
       if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {
          _shiftKeysPressed--;
       }
@@ -126,14 +126,7 @@ public:
 
    void draw() {
       // activates shader with given name
-      // renderer.beginShader("normals"); 
-      renderer.beginShader("phong-vertex"); 
-      // renderer.beginShader("phong-pixel"); 
-      // renderer.beginShader("billboard"); 
-      // renderer.beginShader("lines"); 
-      // renderer.beginShader("cubemap"); 
-      // renderer.beginShader("text");
-      // renderer.beginShader("unlit");
+      renderer.beginShader(_shaderNames[_currentShaderIdx]); 
 
       renderer.setUniform("ViewMatrix", renderer.viewMatrix());
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
@@ -150,23 +143,19 @@ public:
       renderer.setUniform("ks", ks);
       renderer.setUniform("phongExp", phongExp);
 
+      renderer.setUniform("time", elapsedTime());
+
       float aspect = ((float) width()) / height();
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
-      // renderer.ortho(-5.0f, 5.0f, -5.0f, 5.0f, -5.0f, 5.0f);
-
-      // renderer.rotate(vec3(0,0,90));
 
       vec3 minBounds = _mesh.minBounds();
       vec3 maxBounds = _mesh.maxBounds();
-      // cout << "x " << minBounds[0] << " " << maxBounds[0] << endl;
-      // cout << "y " << minBounds[1] << " " << maxBounds[1] << endl;
-      // cout << "z " << minBounds[2] << " " << maxBounds[2] << endl;
 
       float windowX = abs(minBounds[0]) + (maxBounds[0]);
       float windowY = abs(minBounds[1]) + (maxBounds[1]);
       float windowZ = abs(minBounds[2]) + (maxBounds[2]);
       float maxDimension = std::max(std::max(windowX, windowY), windowZ);
-      // cout << "maxDimension " << maxDimension << endl;
+
       renderer.scale(vec3(_viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension));
 
       float centroidX = (minBounds[0] + maxBounds[0]) / 2.0f;
@@ -201,6 +190,9 @@ protected:
    int _shiftKeysPressed;
    vector<string> _fileNames;
    int _currentFileIdx;
+   int _currentShaderIdx;
+   string _currentShader;
+   vector<string> _shaderNames;
 };
 
 int main(int argc, char** argv)

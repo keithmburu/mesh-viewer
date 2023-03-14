@@ -40,6 +40,21 @@ int main() {
       int i3 = mesh.indices()[i + 2];
       std::cout << i1 << " " << i2 << " " << i3 << std::endl;
    }
+
+   std::cout << std::endl << "Colors: " << std::endl;
+   for (int i = 0; i < mesh.numTriangles() * 3; i += 3) {
+      int r = mesh.colors()[i + 0];
+      int g = mesh.colors()[i + 1];
+      int b = mesh.colors()[i + 2];
+      std::cout << r << " " << g << " " << b << std::endl;
+   }
+
+   std::cout << std::endl << "UVs: " << std::endl;
+   for (int i = 0; i < mesh.numTriangles() * 3; i += 3) {
+      int u = mesh.indices()[i + 0];
+      int v = mesh.indices()[i + 1];
+      std::cout << u << " " << v << std::endl;
+   }
    return 0;
 }
 
