@@ -10,6 +10,9 @@
 #include "agl/window.h"
 #include "plymesh.h"
 #include "osutils.h"
+#include "image.h"
+#include <algorithm>
+
 
 using namespace std;
 using namespace glm;
@@ -19,8 +22,7 @@ class MeshViewer : public Window {
 public:
    MeshViewer() : Window() {
       _radius = _viewVolumeSide = 10;
-      _azimuth = 0;
-      _elevation = 0;
+      _azimuth = _elevation = 0;
       _lookPos = vec3(0, 0, 0);
       _up = vec3(0, 1, 0);
       _lightPos = vec3(_viewVolumeSide, _viewVolumeSide, _viewVolumeSide);
@@ -28,20 +30,34 @@ public:
       _leftClick = false;
       _shiftKeysPressed = 0;
       _fileNames = GetFilenamesInDir("../models", "ply");
-      _shaderNames = {"test", "unlit", "normals", "phong-vertex", "phong-pixel", "billboard", "cubemap", "lines", "text", "toon"};
-      _currentFileIdx = _currentShaderIdx = 0;
+      vector<string> _shaderFileNames = GetFilenamesInDir("../shaders/", "vs");
+      std::transform(_shaderFileNames.begin(), _shaderFileNames.end(), std::back_inserter(_shaderNames), [](string name) {
+        return name.substr(0, name.size() - 3);
+      });
+      _currentFileIdx = _currentShaderIdx = _currentTextureIdx = 0;
       cout << "Current model: " << _fileNames[_currentFileIdx] << endl;
       cout << "Current shader: " << _shaderNames[_currentShaderIdx] << endl;
+      if (_shaderNames[_currentShaderIdx] == "texture") {
+         _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
+         if (_textureNames.size() != 0) {
+            _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
+            cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
+         } else {
+            cout << "(No textures)" << endl;
+         }
+      }
       _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
    }
 
    void setup() {
+      // load shaders
       for (string shaderName : _shaderNames) {
          renderer.loadShader(shaderName, "../shaders/" + shaderName + ".vs", "../shaders/" + shaderName + ".fs");
       }
    }
 
    void mouseMotion(int x, int y, int dx, int dy) {
+      // zoom in or out
       if (_leftClick) {
          if (_shiftKeysPressed) {
             scroll(dx, dy); // zoom in or out
@@ -59,8 +75,6 @@ public:
             } else if (_azimuth < 0) {
                _azimuth = 2 * M_PI;
             }
-            // cout << "elevation " << _elevation << endl;
-            // cout << "azimuth " << _azimuth << endl;
          }
       }
    }
@@ -78,18 +92,18 @@ public:
    }
 
    void scroll(float dx, float dy) {
+      // scroll up or down to zoom in or out
       _radius -= dy;
       if (_radius < 1) {
          _radius = 1;
       }
+      // scroll sideways to slowly pan sideways
       _azimuth += dx * (M_PI / 180);
       if (_azimuth > 2 * M_PI) {
          _azimuth = 0;
       } else if (_azimuth < 0) {
          _azimuth = 2 * M_PI;
       }
-      // cout << "radius " << _radius << endl;
-      // cout << "azimuth " << _azimuth << endl;
    }
 
    void keyDown(int key, int mods) {
@@ -113,11 +127,33 @@ public:
          _radius = _viewVolumeSide;
          _azimuth = 0;
          _elevation = 0;
+         if (_shaderNames[_currentShaderIdx] == "texture") {
+            _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
+            if (_textureNames.size() != 0) {
+               _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
+               cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
+            } else {
+               cout << "(No textures)" << endl;
+            }
+         }
          _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
       } else if (key == GLFW_KEY_S) {
          _currentShaderIdx = (_currentShaderIdx + 1) % _shaderNames.size();
-         _currentShader = _shaderNames[_currentShaderIdx];
-         cout << "Next shader: " << _currentShader << endl;
+         cout << "Next shader: " << _shaderNames[_currentShaderIdx] << endl;
+         if (_shaderNames[_currentShaderIdx] == "texture") {
+            _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
+            if (_textureNames.size() != 0) {
+               _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
+               cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
+            } else {
+               cout << "(No textures)" << endl;
+            }
+         }
+      } else if (key == GLFW_KEY_T) {
+         if (_shaderNames[_currentShaderIdx] == "texture"  && _textureNames.size() != 0) {
+            _currentTextureIdx = (_currentTextureIdx + 1) % _textureNames.size();
+            cout << "Next texture: " << _textureNames[_currentTextureIdx] << endl;
+         }
       }
       if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {
          _shiftKeysPressed--;
@@ -127,23 +163,6 @@ public:
    void draw() {
       // activates shader with given name
       renderer.beginShader(_shaderNames[_currentShaderIdx]); 
-
-      renderer.setUniform("ViewMatrix", renderer.viewMatrix());
-      renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
-
-      renderer.setUniform("lightPos", _lightPos.x, _lightPos.y, _lightPos.z);
-      renderer.setUniform("lightColor", _lightColor.x, _lightColor.y, _lightColor.z);
-      renderer.setUniform("eyePos", _camPos);
-
-      float ka = 0.1, kd = 0.7, ks = 0.6;
-      float phongExp = 50.0;
-
-      renderer.setUniform("ka", ka);
-      renderer.setUniform("kd", kd);
-      renderer.setUniform("ks", ks);
-      renderer.setUniform("phongExp", phongExp);
-
-      renderer.setUniform("time", elapsedTime());
 
       float aspect = ((float) width()) / height();
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
@@ -169,8 +188,35 @@ public:
       _camPos = vec3(camPosX, camPosY, camPosZ);
       renderer.lookAt(_camPos, _lookPos, _up);
 
+      renderer.setUniform("ViewMatrix", renderer.viewMatrix());
+      renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
+
+      float lightPosX = _radius * sin(_azimuth + M_PI / 4) * cos(_elevation + M_PI / 4);
+      float lightPosY = _radius * sin(_elevation + M_PI / 4);
+      float lightPosZ = _radius * cos(_azimuth + M_PI / 4) * cos(_elevation + M_PI / 4);
+      _lightPos = vec3(lightPosX, lightPosY, lightPosZ);
+
+      renderer.setUniform("lightPos", _lightPos.x, _lightPos.y, _lightPos.z);
+      renderer.setUniform("lightColor", _lightColor.x, _lightColor.y, _lightColor.z);
+      renderer.setUniform("eyePos", _camPos);
+
+      float ka = 0.1, kd = 0.7, ks = 0.6;
+      float phongExp = 50.0;
+
+      renderer.setUniform("ka", ka);
+      renderer.setUniform("kd", kd);
+      renderer.setUniform("ks", ks);
+      renderer.setUniform("phongExp", phongExp);
+
+      renderer.setUniform("time", elapsedTime());
+
+      if (_shaderNames[_currentShaderIdx] == "texture" && _textureNames.size() != 0) {
+         Image textureImg;
+         textureImg.load("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4) + "/" + _textureNames[_currentTextureIdx]);
+         renderer.setUniform("textureImg", textureImg.data());
+      }
+
       renderer.mesh(_mesh);
-      // renderer.cube(); // for debugging!
 
       renderer.endShader();
    }
@@ -190,9 +236,10 @@ protected:
    int _shiftKeysPressed;
    vector<string> _fileNames;
    int _currentFileIdx;
-   int _currentShaderIdx;
-   string _currentShader;
    vector<string> _shaderNames;
+   int _currentShaderIdx;
+   vector<string> _textureNames;
+   int _currentTextureIdx;
 };
 
 int main(int argc, char** argv)

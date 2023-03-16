@@ -59,16 +59,16 @@ namespace agl {
                // cout << buffer << endl;
                int begin = 0;
                int end = buffer.find(" ", begin);
-               for (int j = 1; j <= 6; j++) {
+               for (int j = 1; j <= 11; j++) {
                   // cout << begin << " " << end << " " << buffer.substr(begin, 8) << endl;
                   if (j <= 3) {
                      _positions.push_back(stof(buffer.substr(begin, end - begin)));
                   } else if (j <= 6) {
                      _normals.push_back(stof(buffer.substr(begin, end - begin)));
-                  } else if (j <= 9) {
-                     _colors.push_back(stof(buffer.substr(begin, end - begin)));
-                  } else if (j <= 11) {
+                  } else if (j <= 8) {
                      _uvs.push_back(stof(buffer.substr(begin, end - begin)));
+                  } else if (j <= 11) {
+                     _colors.push_back(stof(buffer.substr(begin, end - begin)));
                   }
                   begin = end + 1;
                   end = buffer.find(" ", begin);
