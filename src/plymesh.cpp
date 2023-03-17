@@ -21,7 +21,7 @@ namespace agl {
 
    void PLYMesh::init() {
       assert(_positions.size() != 0);
-      initBuffers(&_faces, &_positions, &_normals);
+      initBuffers(&_faces, &_positions, &_normals, &_uvs);
    }
 
    PLYMesh::~PLYMesh() {
@@ -145,4 +145,5 @@ namespace agl {
    const vector<GLfloat>& PLYMesh::uvs() const {
       return _uvs;
    }
+
 }

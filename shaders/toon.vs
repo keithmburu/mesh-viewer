@@ -1,8 +1,8 @@
 #version 400
 
 layout (location = 0) in vec3 vPos;
-layout (location = 1) in vec3 vNormal;
-layout (location = 2) in vec3 vUV;
+layout (location = 1) in vec3 vNormals;
+layout (location = 2) in vec2 vUVs;
 
 uniform mat3 NormalMatrix;
 uniform mat4 ModelViewMatrix;
@@ -10,33 +10,26 @@ uniform mat4 MVP;
 uniform bool HasUV;
 
 uniform mat4 ViewMatrix;
+uniform mat4 ProjMatrix;
+
 uniform vec3 lightPos;
+uniform vec3 lightColor;
 uniform vec3 eyePos;
 
-out vec3 color;
+out vec3 normalVec;
+out vec3 eyeVec;
+out vec3 lightVec;
+out vec2 uv;
 
 void main()
 {
-   gl_Position = MVP * vec4(vPos, 1.0);
-
    vec4 pos = ModelViewMatrix * vec4(vPos, 1.0);
    vec4 eyePos = ModelViewMatrix * vec4(eyePos, 1.0);
    vec4 lightPos = ViewMatrix * vec4(lightPos, 1.0);
-   vec3 normalVec = NormalMatrix * vNormal;
-   vec3 eyeVec = normalize(eyePos.xyz - pos.xyz);
-   vec3 lightVec = normalize(lightPos.xyz - pos.xyz);
+   normalVec = NormalMatrix * vNormals;
 
-   vec3 n = normalize(normalVec);
-   vec3 l = normalize(lightVec);
-
-   float thresh = 0.1;
-   if (abs(dot(eyeVec, normalVec)) < 0.25) {
-      color = vec3(1.0, 1.0, 1.0);
-   } else if (dot(n, l) > 0.9) {
-    color = vec3(1.0, 0.4, 0.0);
-   } else if (dot(n, l) > 0.4) {
-    color = vec3(1.0, 0.7, 0.0);
-   } else {
-    color = vec3(1.0, 1.0, 0.0);
-   }
+   eyeVec = normalize(eyePos.xyz - pos.xyz);
+   lightVec = normalize(lightPos.xyz - pos.xyz);
+   gl_Position = ProjMatrix * pos;
+   uv = vUVs;
 }

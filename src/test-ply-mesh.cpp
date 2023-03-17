@@ -10,7 +10,7 @@ using namespace glm;
 using namespace agl;
 
 int main() {
-   PLYMesh mesh("../models/footstool.ply");
+   PLYMesh mesh("../models/triangle.ply");
 
    // print vertices, normals, colors, etc
    std::cout << "This mesh has " << mesh.numVertices() << " vertices" << std::endl;
@@ -33,14 +33,6 @@ int main() {
       std::cout << vec3(x,y,z) << std::endl;
    }
 
-   std::cout << std::endl << "Indices: " << std::endl;
-   for (int i = 0; i < mesh.numTriangles() * 3; i += 3) {
-      int i1 = mesh.indices()[i + 0];
-      int i2 = mesh.indices()[i + 1];
-      int i3 = mesh.indices()[i + 2];
-      std::cout << i1 << " " << i2 << " " << i3 << std::endl;
-   }
-
    if (mesh.colors().size() != 0) {
       std::cout << std::endl << "Colors: " << std::endl;
       for (int i = 0; i < mesh.numTriangles() * 3; i += 3) {
@@ -53,12 +45,21 @@ int main() {
 
    if (mesh.uvs().size() != 0) {
       std::cout << std::endl << "UVs: " << std::endl;
-      for (int i = 0; i < mesh.numTriangles() * 2; i += 2) {
-         int u = mesh.indices()[i + 0];
-         int v = mesh.indices()[i + 1];
+      for (int i = 0; i < mesh.numVertices() * 2; i += 2) {
+         float u = mesh.uvs()[i + 0];
+         float v = mesh.uvs()[i + 1];
          std::cout << u << " " << v << std::endl;
       }
    }
+
+   std::cout << std::endl << "Indices: " << std::endl;
+   for (int i = 0; i < mesh.numTriangles() * 3; i += 3) {
+      int i1 = mesh.indices()[i + 0];
+      int i2 = mesh.indices()[i + 1];
+      int i3 = mesh.indices()[i + 2];
+      std::cout << i1 << " " << i2 << " " << i3 << std::endl;
+   }
+
    return 0;
 }
 

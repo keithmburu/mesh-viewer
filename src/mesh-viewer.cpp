@@ -37,20 +37,18 @@ public:
       _currentFileIdx = _currentShaderIdx = _currentTextureIdx = 0;
       cout << "Current model: " << _fileNames[_currentFileIdx] << endl;
       cout << "Current shader: " << _shaderNames[_currentShaderIdx] << endl;
-      if (_shaderNames[_currentShaderIdx] == "texture") {
-         _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
-         if (_textureNames.size() != 0) {
-            _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
-            cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
-         } else {
-            cout << "(No textures)" << endl;
-         }
+      _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
+      if (_textureNames.size() != 0) {
+         _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
+         cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
+      } else {
+         cout << "(No textures)" << endl;
       }
       _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
    }
 
    void setup() {
-      // load shaders
+      //load shaders
       for (string shaderName : _shaderNames) {
          renderer.loadShader(shaderName, "../shaders/" + shaderName + ".vs", "../shaders/" + shaderName + ".fs");
       }
@@ -127,30 +125,19 @@ public:
          _radius = _viewVolumeSide;
          _azimuth = 0;
          _elevation = 0;
-         if (_shaderNames[_currentShaderIdx] == "texture") {
-            _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
-            if (_textureNames.size() != 0) {
-               _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
-               cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
-            } else {
-               cout << "(No textures)" << endl;
-            }
+         _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
+         if (_textureNames.size() != 0) {
+            _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
+            cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
+         } else {
+            cout << "(No textures)" << endl;
          }
          _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
       } else if (key == GLFW_KEY_S) {
          _currentShaderIdx = (_currentShaderIdx + 1) % _shaderNames.size();
          cout << "Next shader: " << _shaderNames[_currentShaderIdx] << endl;
-         if (_shaderNames[_currentShaderIdx] == "texture") {
-            _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
-            if (_textureNames.size() != 0) {
-               _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
-               cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
-            } else {
-               cout << "(No textures)" << endl;
-            }
-         }
       } else if (key == GLFW_KEY_T) {
-         if (_shaderNames[_currentShaderIdx] == "texture"  && _textureNames.size() != 0) {
+         if (_textureNames.size() != 0) {
             _currentTextureIdx = (_currentTextureIdx + 1) % _textureNames.size();
             cout << "Next texture: " << _textureNames[_currentTextureIdx] << endl;
          }
@@ -210,10 +197,9 @@ public:
 
       renderer.setUniform("time", elapsedTime());
 
-      if (_shaderNames[_currentShaderIdx] == "texture" && _textureNames.size() != 0) {
-         Image textureImg;
-         textureImg.load("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4) + "/" + _textureNames[_currentTextureIdx]);
-         renderer.setUniform("textureImg", textureImg.data());
+      if (_textureNames.size() != 0) {
+         renderer.loadTexture("textureImg", "../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4) + "/" + _textureNames[_currentTextureIdx], 0);
+         renderer.texture("textureImg", "textureImg");
       }
 
       renderer.mesh(_mesh);
