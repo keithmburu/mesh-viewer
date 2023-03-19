@@ -31,20 +31,30 @@ public:
       _shiftKeysPressed = 0;
       _fileNames = GetFilenamesInDir("../models", "ply");
       vector<string> _shaderFileNames = GetFilenamesInDir("../shaders/", "vs");
+      // remove file extensions
       std::transform(_shaderFileNames.begin(), _shaderFileNames.end(), std::back_inserter(_shaderNames), [](string name) {
         return name.substr(0, name.size() - 3);
       });
-      _currentFileIdx = _currentShaderIdx = _currentTextureIdx = 0;
+      _currentFileIdx = _currentShaderIdx = _currentTextureIdx = _currentCubemapIdx = 0;
       cout << "Current model: " << _fileNames[_currentFileIdx] << endl;
       cout << "Current shader: " << _shaderNames[_currentShaderIdx] << endl;
       _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
-      if (_textureNames.size() != 0) {
+      _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
+      _animatedLight = true;
+      if (_mesh.hasUV() && _textureNames.size() != 0) {
+         // clean up GetFilenamesInDir() output
          _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
          cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
+         _textureSlot = ((_currentFileIdx + 1) * 10) + _currentTextureIdx;
+         renderer.loadTexture("textureImg", "../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4) + "/" + _textureNames[_currentTextureIdx], _textureSlot);
       } else {
          cout << "(No textures)" << endl;
       }
-      _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
+      _cubemapNames = GetFilenamesInDir("../cubemaps/", "cubemap");
+      _cubemapNames.erase(_cubemapNames.begin(), _cubemapNames.begin() + 2);
+      cout << "Current cubemap: " << _cubemapNames[_currentCubemapIdx] << endl;
+      renderer.loadCubemap("cubemap", "../cubemaps/" + _cubemapNames[_currentCubemapIdx], 0);
+      _animatedLight = _animatedCamera = false;
    }
 
    void setup() {
@@ -126,21 +136,31 @@ public:
          _azimuth = 0;
          _elevation = 0;
          _textureNames = GetFilenamesInDir("../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4), ".");
-         if (_textureNames.size() != 0) {
+         _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
+         if (_mesh.hasUV() && _textureNames.size() != 0) {
             _textureNames.erase(_textureNames.begin(), _textureNames.begin() + 2);
             cout << "Current texture: " << _textureNames[_currentTextureIdx] << endl;
+            glDisable(GL_TEXTURE0 + _textureSlot);
+            _textureSlot = ((_currentFileIdx + 1) * 10) + _currentTextureIdx;
+            renderer.loadTexture("textureImg", "../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4) + "/" + _textureNames[_currentTextureIdx], _textureSlot);
          } else {
             cout << "(No textures)" << endl;
          }
-         _mesh = PLYMesh("../models/" + _fileNames[_currentFileIdx]);
       } else if (key == GLFW_KEY_S) {
          _currentShaderIdx = (_currentShaderIdx + 1) % _shaderNames.size();
          cout << "Next shader: " << _shaderNames[_currentShaderIdx] << endl;
       } else if (key == GLFW_KEY_T) {
-         if (_textureNames.size() != 0) {
+         if (_mesh.hasUV() && _textureNames.size() != 0) {
             _currentTextureIdx = (_currentTextureIdx + 1) % _textureNames.size();
             cout << "Next texture: " << _textureNames[_currentTextureIdx] << endl;
+            glDisable(GL_TEXTURE0 + _textureSlot);
+            _textureSlot = ((_currentFileIdx + 1) * 10) + _currentTextureIdx;
+            renderer.loadTexture("textureImg", "../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4) + "/" + _textureNames[_currentTextureIdx], _textureSlot);
          }
+      } else if (key == GLFW_KEY_L) {
+         _animatedLight = !_animatedLight;
+      } else if (key == GLFW_KEY_C) {
+         _animatedCamera = !_animatedCamera;
       }
       if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {
          _shiftKeysPressed--;
@@ -169,27 +189,32 @@ public:
       float centroidZ = (minBounds[2] + maxBounds[2]) / 2.0f;
       renderer.translate(vec3(-centroidX, -centroidY, -centroidZ));
 
-      float camPosX = _radius * sin(_azimuth) * cos(_elevation);
-      float camPosY = _radius * sin(_elevation);
-      float camPosZ = _radius * cos(_azimuth) * cos(_elevation);
-      _camPos = vec3(camPosX, camPosY, camPosZ);
+      if (_animatedCamera) {
+         _camPos = vec3(_viewVolumeSide * cos(elapsedTime()), _viewVolumeSide * sin(elapsedTime()), _viewVolumeSide * sin(elapsedTime()));
+      } else {
+         float camPosX = _radius * sin(_azimuth) * cos(_elevation);
+         float camPosY = _radius * sin(_elevation);
+         float camPosZ = _radius * cos(_azimuth) * cos(_elevation);
+         _camPos = vec3(camPosX, camPosY, camPosZ);
+      }
       renderer.lookAt(_camPos, _lookPos, _up);
+
+      if (_animatedLight) {
+         _lightPos = vec3(_viewVolumeSide * cos(elapsedTime()), _viewVolumeSide * sin(elapsedTime()), _viewVolumeSide * (cos(elapsedTime()) + sin(elapsedTime())));
+      } else {
+         float lightPosX = _radius * sin(_azimuth + M_PI / 4) * cos(_elevation + M_PI / 4);
+         float lightPosY = _radius * sin(_elevation + M_PI / 4);
+         float lightPosZ = _radius * cos(_azimuth + M_PI / 4) * cos(_elevation + M_PI / 4);
+         _lightPos = vec3(lightPosX, lightPosY, lightPosZ);
+      }
 
       renderer.setUniform("ViewMatrix", renderer.viewMatrix());
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
-
-      float lightPosX = _radius * sin(_azimuth + M_PI / 4) * cos(_elevation + M_PI / 4);
-      float lightPosY = _radius * sin(_elevation + M_PI / 4);
-      float lightPosZ = _radius * cos(_azimuth + M_PI / 4) * cos(_elevation + M_PI / 4);
-      _lightPos = vec3(lightPosX, lightPosY, lightPosZ);
-
       renderer.setUniform("lightPos", _lightPos.x, _lightPos.y, _lightPos.z);
       renderer.setUniform("lightColor", _lightColor.x, _lightColor.y, _lightColor.z);
       renderer.setUniform("eyePos", _camPos);
-
       float ka = 0.1, kd = 0.7, ks = 0.6;
       float phongExp = 50.0;
-
       renderer.setUniform("ka", ka);
       renderer.setUniform("kd", kd);
       renderer.setUniform("ks", ks);
@@ -197,9 +222,13 @@ public:
 
       renderer.setUniform("time", elapsedTime());
 
-      if (_textureNames.size() != 0) {
-         renderer.loadTexture("textureImg", "../textures/" + _fileNames[_currentFileIdx].substr(0, _fileNames[_currentFileIdx].size() - 4) + "/" + _textureNames[_currentTextureIdx], 0);
+      renderer.setUniform("UseTextures", _mesh.hasUV() && _textureNames.size() != 0);
+      if (_mesh.hasUV() && _textureNames.size() != 0) {
          renderer.texture("textureImg", "textureImg");
+      }
+
+      if (_shaderNames[_currentShaderIdx] == "cubemap") {
+         renderer.cubemap("cubemap", "cubemap");
       }
 
       renderer.mesh(_mesh);
@@ -226,6 +255,11 @@ protected:
    int _currentShaderIdx;
    vector<string> _textureNames;
    int _currentTextureIdx;
+   int _textureSlot;
+   vector<string> _cubemapNames;
+   int _currentCubemapIdx;
+   bool _animatedLight;
+   bool _animatedCamera;
 };
 
 int main(int argc, char** argv)

@@ -70,6 +70,7 @@ namespace agl {
                   } else if (j <= 11) {
                      _colors.push_back(stof(buffer.substr(begin, end - begin)));
                   }
+                  if (end == -1) break;
                   begin = end + 1;
                   end = buffer.find(" ", begin);
                }
@@ -144,6 +145,10 @@ namespace agl {
 
    const vector<GLfloat>& PLYMesh::uvs() const {
       return _uvs;
+   }
+
+   bool PLYMesh::hasUV() const {
+      return (_uvs.size() != 0);
    }
 
 }

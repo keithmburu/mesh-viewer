@@ -29,8 +29,8 @@ void main()
       diffuseColor = vec3(1.0, 0.6, 0.0);
    }
 
-   vec3 color = ka * lightColor * texture(textureImg, uv).xyz;
-   color += (1.0 - ka) * diffuseColor;
+   vec3 color = (1.0 - kd) * lightColor * texture(textureImg, uv).xyz;
+   color += kd * diffuseColor;
 
    FragColor = vec4(color, 1.0);
 }

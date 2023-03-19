@@ -45,10 +45,19 @@ mesh-viewer/build $ ../bin/mesh-viewer
 ## Demo of basic features
 
 TODO: Document the core features of your viewer (shaders + models)
+1. Normals shading
+2. Phong per-pixel shading
+3. Phong per-vertex shading
 
 ## Unique features 
 
 TODO: Show the unique features you made
+
+1. Animated Light
+2. Animated Camera
+3. Toon shading
+4. Textures
+5. Distorted Polka Dot shading
 
 ## Credits
 

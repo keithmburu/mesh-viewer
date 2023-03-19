@@ -51,11 +51,13 @@ namespace agl {
       // texture coordinates of each vertex in this model
       const std::vector<GLfloat>& uvs() const;
 
+      // check if texture coordinates are available
+      bool hasUV() const;
+
    protected:
       void init();
 
    protected:
-
       std::vector<GLfloat> _positions;
       std::vector<GLfloat> _normals;
       std::vector<GLuint> _faces;
