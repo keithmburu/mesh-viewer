@@ -8,7 +8,6 @@ uniform mat4 MVP;
 
 void main()
 {
-   // ReflectDir = (ModelMatrix * vec4(vPosition, 1.0)).xyz;
    ReflectDir = vPosition;
    gl_Position = MVP * vec4(vPosition, 1.0);
 }

@@ -69,4 +69,6 @@ TODO: Show the unique features you made
 "Full body scan" (https://skfb.ly/oELNA) by Artec 3D is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).\
 "Measuring tape" (https://skfb.ly/oELNA) by Artec 3D is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).\
 "Face" (https://www.artec3d.com/3d-models/face) by Artec 3D is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+"Forest Background - panorama" (https://www.cleanpng.com/png-equirectangular-projection-3d-computer-graphics-de-4995986/download-png.html) by Avadu
+"Sea cubemap" (https://learnopengl.com/Advanced-OpenGL/Cubemaps)
 
