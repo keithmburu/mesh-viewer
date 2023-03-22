@@ -2,7 +2,7 @@
 
 Implements a simple PLY viewer
 
-TODO: Add a representative image for your project here
+<img src="results/fracttree-cubemap-8335.png" width="400">
 
 ## How to build
 
@@ -45,14 +45,20 @@ mesh-viewer/build $ ../bin/mesh-viewer
 ## Demo of basic features
 
 1. Normals shading
-<img src="results/beethoven-normals-492.png" width="200">
-<img src="results/silver-crafts-normals-492.png" width="200">
+<div style="display:flex;">
+    <img src="results/beethoven-normals-492.png" width="200" style="flex:1;">
+    <img src="results/silver-crafts-normals-492.png" width="200" style="flex:1;">
+</div>
 2. Phong per-pixel shading
-<img src="results/big_spider-phong-pixel-2362.png" width="200">
-<img src="results/canstick-phong-pixel-27.png" width="200">
+<div style="display:flex;">
+    <img src="results/big_spider-phong-pixel-2362.png" width="200" style="flex:1;">
+    <img src="results/canstick-phong-pixel-27.png" width="200" style="flex:1;">
+</div>
 3. Phong per-vertex shading
-<img src="results/big_spider-phong-vertex-886.png" width="200">
-<img src="results/canstick-phong-vertex-2777.png" width="200">
+<div style="display:flex;">
+    <img src="results/big_spider-phong-vertex-886.png" width="200" style="flex:1;">
+    <img src="results/canstick-phong-vertex-2777.png" width="200" style="flex:1;">
+</div>
 
 ## Unique features 
 
