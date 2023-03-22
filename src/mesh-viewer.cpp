@@ -46,21 +46,20 @@ public:
          return name.substr(0, name.size() - 3);
       });
       _shaderNames.erase(find(_shaderNames.begin(), _shaderNames.end(), "text"));
-
-      _cubemapNames = GetFilenamesInDir("../cubemaps/", "cubemap");
-      cout << endl;
-      renderer.loadCubemap("cubemap", "../cubemaps/" + _cubemapNames[_currentCubemapIdx], 1);
       
       _textureFileNames = GetFilenamesInDir("../textures/" + _modelNames[_currentModelIdx], ".");
       cout << endl;
 
+      _cubemapNames = GetFilenamesInDir("../cubemaps/", "cubemap");
+      cout << endl;
+
       cout << "Current model: " << _modelNames[_currentModelIdx] << endl;
       cout << "Current shader: " << _shaderNames[_currentShaderIdx] << endl;
-      if (_shaderNames[_currentShaderIdx] == "cubemap") {
-         cout << "Current cubemap: " << _cubemapNames[_currentCubemapIdx] << endl;
-      }
-      if (useTextures()) {
+      if (useTextures(true)) {
          setupTexture(true, "Current");
+      } 
+      if (useCubemaps(true)) {
+         setupCubemap(true, "Current");
       } 
 
       _mesh = PLYMesh("../models/" + _modelNames[_currentModelIdx] + ".ply");
@@ -142,30 +141,30 @@ public:
             cout << "\nPrevious model: " << _modelNames[_currentModelIdx] << endl;
          }
          _radius = _viewVolumeSide;
-         _azimuth = 0;
-         _elevation = 0;
+         _azimuth = _elevation = 0;
          _textureFileNames = GetFilenamesInDir("../textures/" + _modelNames[_currentModelIdx], ".");
          _mesh = PLYMesh("../models/" + _modelNames[_currentModelIdx] + ".ply");
-         if (useTextures()) {
+         if (useTextures(true)) {
             setupTexture(true, "Current");
          } 
+         if (useCubemaps(false)) {
+            setupCubemap(false, "Current");
+         }
       } else if (key == GLFW_KEY_S) {
          _currentShaderIdx = (_currentShaderIdx + 1) % _shaderNames.size();
          cout << "Next shader: " << _shaderNames[_currentShaderIdx] << endl;
-         if (useTextures()) {
-            setupTexture(true, "Current");
-         } else if (_shaderNames[_currentShaderIdx] == "cubemap") {
-            cout << "Current cubemap: " << _cubemapNames[_currentCubemapIdx] << endl;
-         }
+         if (useTextures(true)) {
+            setupTexture(false, "Current");
+         } else if (useCubemaps(true)) {
+            setupCubemap(false, "Current");
+         } 
       } else if (key == GLFW_KEY_T) {
-         if (useTextures()) {
+         if (useTextures(true)) {
            setupTexture(false, "Next");
          }
       } else if (key == GLFW_KEY_C) {
-         if (_shaderNames[_currentShaderIdx] == "cubemap" || _shaderNames[_currentShaderIdx] == "polka-dot") {
-            _currentCubemapIdx = (_currentCubemapIdx + 1) % _cubemapNames.size();
-            cout << "Next cubemap: " << _cubemapNames[_currentCubemapIdx] << endl;
-            renderer.loadCubemap("cubemap", "../cubemaps/" + _cubemapNames[_currentCubemapIdx], 1);
+         if (useCubemaps(true)) {
+            setupCubemap(false, "Next");
          }
       } else if (key == GLFW_KEY_L) {
          _animatedLight = !_animatedLight;
@@ -186,7 +185,7 @@ public:
       float aspect = ((float) width()) / height();
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
 
-      // scale model to fit view volume and center
+      // center model and scale to fit view volume
       vec3 minBounds = _mesh.minBounds();
       vec3 maxBounds = _mesh.maxBounds();
 
@@ -223,37 +222,44 @@ public:
       }
 
       // phong shading uniforms
-      renderer.setUniform("ViewMatrix", renderer.viewMatrix());
-      renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
-      renderer.setUniform("lightPos", _lightPos.x, _lightPos.y, _lightPos.z);
-      renderer.setUniform("lightColor", _lightColor.x, _lightColor.y, _lightColor.z);
-      renderer.setUniform("eyePos", _camPos);
-      float ka = 0.1, kd = 0.7, ks = 0.6;
-      float phongExp = 50.0;
-      renderer.setUniform("ka", ka);
-      renderer.setUniform("kd", kd);
-      renderer.setUniform("ks", ks);
-      renderer.setUniform("phongExp", phongExp);
-
-      renderer.setUniform("time", elapsedTime());
+      std::set<string> reflectiveShaders = {"phong-pixel", "phong-vertex", "billboard", "toon-1", "toon-2", "glossy-black"};
+      if (reflectiveShaders.find(_shaderNames[_currentShaderIdx]) != reflectiveShaders.end()) {
+         renderer.setUniform("ViewMatrix", renderer.viewMatrix());
+         renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
+         renderer.setUniform("lightPos", _lightPos.x, _lightPos.y, _lightPos.z);
+         renderer.setUniform("lightColor", _lightColor.x, _lightColor.y, _lightColor.z);
+         renderer.setUniform("eyePos", _camPos);
+         float ka = 0.1, kd = 0.7, ks = 0.6;
+         float phongExp = 50.0;
+         renderer.setUniform("ka", ka);
+         renderer.setUniform("kd", kd);
+         renderer.setUniform("ks", ks);
+         renderer.setUniform("phongExp", phongExp);
+      }
 
       // billboard uniforms
-      renderer.setUniform("CameraPos", _camPos);
-      float size = _viewVolumeSide / 10;
-      float rot = 0.0;
-      vec3 offset = vec4(0.0);
-      vec4 color = vec4(1);
-      renderer.setUniform("Size", size);
-      renderer.setUniform("Rot", rot);
-      renderer.setUniform("Offset", offset);
-      renderer.setUniform("Color", color);
+      if (_shaderNames[_currentShaderIdx] == "billboard") {
+         renderer.setUniform("CameraPos", _camPos);
+         float size = _viewVolumeSide / 10;
+         float rot = 0.0;
+         vec3 offset = vec4(0.0);
+         vec4 color = vec4(1);
+         renderer.setUniform("Size", size);
+         renderer.setUniform("Rot", rot);
+         renderer.setUniform("Offset", offset);
+         renderer.setUniform("Color", color);
+      }
 
-      // ripples uniforms
-      renderer.setUniform("numFaces", (int) _mesh.indices().size());
-
+      // pulse shader uniforms
+      if (_shaderNames[_currentShaderIdx] == "pulse") {
+         renderer.setUniform("numFaces", (int) _mesh.indices().size());
+      }
+      
       // texture uniforms
       renderer.setUniform("UseTextures", useTextures(false));
       
+      renderer.setUniform("time", elapsedTime());
+
       if (_shaderNames[_currentShaderIdx] == "glossy-black") {
          background(vec3(1, 1, 1));
       } else {
@@ -261,12 +267,12 @@ public:
       }
 
       if (useTextures(false)) {
-         renderer.texture("textureImg", "textureImg");
+         renderer.texture("textureImg", _textureFileNames[_currentTextureIdx]);
       }
-      if (_shaderNames[_currentShaderIdx] == "cubemap") {
+      if (useCubemaps(false)) {
          renderer.cubemap("cubemap", "cubemap");
       }
-      if (_shaderNames[_currentShaderIdx] == "cubemap" || _shaderNames[_currentShaderIdx] == "polka-dot") {
+      if (useCubemaps(false) || _shaderNames[_currentShaderIdx] == "polka-dot") {
          renderer.skybox(_viewVolumeSide);
       }
       
@@ -275,7 +281,7 @@ public:
       renderer.endShader();
    }
 
-   bool useTextures(bool printOut = true) {
+   bool useTextures(bool printOut) {
       if (_shaderNames[_currentShaderIdx] == "texture") {
          if (_mesh.hasUV() && _textureFileNames.size() != 0) {
             return true;
@@ -290,13 +296,42 @@ public:
       }
    }
 
-   void setupTexture(bool cleanup, string adjective) {
-      if (cleanup) {
+   void setupTexture(bool cleanUp, string adjective) {
+      if (cleanUp) {
          // clean up GetFilenamesInDir() output
          _textureFileNames.erase(_textureFileNames.begin(), _textureFileNames.begin() + 2);
       }
       cout << adjective << " texture: " << _textureFileNames[_currentTextureIdx] << endl;
-      renderer.loadTexture("textureImg", "../textures/" + _modelNames[_currentModelIdx] + "/" + _textureFileNames[_currentTextureIdx], 0);
+      if (adjective == "Next") {
+         _currentTextureIdx = (_currentTextureIdx + 1) % _textureFileNames.size();
+      }
+      renderer.loadTexture(_textureFileNames[_currentTextureIdx], "../textures/" + _modelNames[_currentModelIdx] + "/" + _textureFileNames[_currentTextureIdx], 0);
+   }
+
+   bool useCubemaps(bool printOut) {
+      if (_shaderNames[_currentShaderIdx] == "cubemap") {
+         if (_cubemapNames.size() != 0) {
+            return true;
+         } else {
+            if (printOut) {
+               cout << "(No cubemaps)" << endl;
+            }
+            return false;
+         }
+      } else {
+         return false;
+      }
+   }
+
+   void setupCubemap(bool cleanUp, string adjective) {
+      if (cleanUp) {
+         _textureFileNames.erase(_textureFileNames.begin(), _textureFileNames.begin() + 2);
+      }
+      cout << adjective << " cubemap: " << _cubemapNames[_currentCubemapIdx] << endl;
+      if (adjective == "Next") {
+         _currentCubemapIdx = (_currentCubemapIdx + 1) % _cubemapNames.size();
+      }
+      renderer.loadCubemap("cubemap", "../cubemaps/" + _cubemapNames[_currentCubemapIdx], 1);
    }
 
 protected:

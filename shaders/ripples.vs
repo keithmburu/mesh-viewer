@@ -8,7 +8,6 @@ uniform mat3 NormalMatrix;
 uniform mat4 ModelViewMatrix;
 uniform mat4 MVP;
 uniform bool HasUV;
-uniform int numFaces;
 uniform float time;
 
 void main()

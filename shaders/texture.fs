@@ -12,6 +12,6 @@ void main()
   if (useTextures == 1) {
     FragColor = texture(textureImg, uv);
   } else {
-    FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    FragColor = vec4(1.0, 1.0, 1.0, 1.0);
   }
 }
