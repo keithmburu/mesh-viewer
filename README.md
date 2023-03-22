@@ -44,51 +44,65 @@ mesh-viewer/build $ ../bin/mesh-viewer
 
 ## Demo of basic features
 
-TODO: Document the core features of your viewer (shaders + models)
 1. Normals shading
-<img src="results/beethoven-normals-492.png" width="400">
-<img src="results/silver-crafts-normals-492.png" width="400">
+<img src="results/beethoven-normals-492.png" width="200">
+<img src="results/silver-crafts-normals-492.png" width="200">
 2. Phong per-pixel shading
-<img src="results/big_spider-phong-pixel-2362.png" width="400">
-<img src="results/canstick-phong-pixel-27.png" width="400">
+<img src="results/big_spider-phong-pixel-2362.png" width="200">
+<img src="results/canstick-phong-pixel-27.png" width="200">
 3. Phong per-vertex shading
-<img src="results/big_spider-phong-vertex-886.png" width="400">
-<img src="results/canstick-phong-vertex-2777.png" width="400">
+<img src="results/big_spider-phong-vertex-886.png" width="200">
+<img src="results/canstick-phong-vertex-2777.png" width="200">
 
 ## Unique features 
 
-TODO: Show the unique features you made
-
 1. Animated Light
-<img src="results/puss-in-boots-toon-1-2777.png" width="400">
+<img src="results/airplane-animated-light.gif" width="400">
 2. Animated Camera
-<img src="results/puss-in-boots-toon-1-2777.png" width="400">
+<img src="results/f16-animated-camera.gif" width="400">
 3. Toon shading
-<img src="results/puss-in-boots-toon-1-2777.png" width="400">
-<img src="results/footbones-toon-1-27.png" width="400">
-<img src="results/mug-toon-2-9172.png" width="400">
-<img src="results/pump-toon-2-5736.png" width="400">
+<div style="display:flex;">
+    <img src="results/puss-in-boots-toon-1-2777.png" width="200" style="flex:1;">
+    <img src="results/footbones-toon-1-27.png" width="200" style="flex:1;">
+</div>
+<div style="display:flex;">
+    <img src="results/mug-toon-2-9172.png" width="200" style="flex:1;">
+    <img src="results/pump-toon-2-5736.png" width="200" style="flex:1;">
+</div>
 4. Textures
-<img src="results/concrete-bags-texture-9383.png" width="400">
-<img src="results/footstool-texture-886.png" width="400">
-5. Polka Dot + Skybox
-<img src="results/airplane-polka-dot-9383.png" width="400">
-<img src="results/apple-polka-dot-886.png" width="400">
-6. Cubemap + Skybox
-<img src="results/helix-cubemap-5386.png" width="400">
-<img src="results/fracttree-cubemap-8335.png" width="400">
-6. Glossy black
-<img src="results/face-glossy-black-2777.png" width="400">
-<img src="results/ant-glossy-black-6649.png" width="400">
-7. Pulse vertices
-<img src="results/ant-pulse.gif" width="400">
-<img src="results/car-pulse.gif" width="400">
-6. Ripple vertices
-<img src="results/big_atc-ripple.gif" width="400">
-<img src="results/spider-ripple.gif" width="400">
-<img src="results/turbine-ripple.gif" width="400">
-<img src="results/tommygun-ripple.gif" width="400">
-
+<div style="display:flex;">
+    <img src="results/concrete-bags-texture-9383.png" width="200" style="flex:1;">
+    <img src="results/footstool-texture-886.png" width="200" style="flex:1;">
+</div>
+5. Polka Dot shading + Skybox
+<div style="display:flex;">
+    <img src="results/airplane-polka-dot-9383.png" width="200" style="flex:1;">
+    <img src="results/apple-polka-dot-886.png" width="200" style="flex:1;">
+</div>
+6. Cubemap shading + Skybox
+<div style="display:flex;">
+    <img src="results/helix-cubemap-5386.png" width="200" style="flex:1;">
+    <img src="results/fracttree-cubemap-8335.png" width="200" style="flex:1;">
+</div>
+7. Glossy black shading
+<div style="display:flex;">
+    <img src="results/face-glossy-black-2777.png" width="200" style="flex:1;">
+    <img src="results/ant-glossy-black-6649.png" width="200" style="flex:1;">
+</div>
+8. Pulsing vertices
+<div style="display:flex;">
+    <img src="results/ant-pulse.gif" width="200" style="flex:1;">
+    <img src="results/car-pulse.gif" width="200" style="flex:1;">
+</div>
+9. Rippling vertices
+<div style="display:flex;">
+    <img src="results/big_atc-ripple.gif" width="200" style="flex:1;">
+    <img src="results/spider-ripple.gif" width="200" style="flex:1;">
+</div>
+<div style="display:flex;">
+    <img src="results/turbine-ripple.gif" width="200" style="flex:1;">
+    <img src="results/tommygun-ripple.gif" width="200" style="flex:1;">
+</div>
 
 
 ## Credits
