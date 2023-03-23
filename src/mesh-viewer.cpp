@@ -40,29 +40,35 @@ public:
          return name.substr(0, name.size() - 4);
       });
 
+      _mesh = PLYMesh("../models/" + _modelNames[_currentModelIdx] + ".ply");
+
       vector<string> _shaderFileNames = GetFilenamesInDir("../shaders/", "vs");
       cout << endl;
       std::transform(_shaderFileNames.begin(), _shaderFileNames.end(), std::back_inserter(_shaderNames), [](string name) {
          return name.substr(0, name.size() - 3);
       });
-      _shaderNames.erase(find(_shaderNames.begin(), _shaderNames.end(), "text"));
       
       _textureFileNames = GetFilenamesInDir("../textures/" + _modelNames[_currentModelIdx], ".");
       cout << endl;
 
       _cubemapNames = GetFilenamesInDir("../cubemaps/", "cubemap");
       cout << endl;
-
+      
       cout << "Current model: " << _modelNames[_currentModelIdx] << endl;
       cout << "Current shader: " << _shaderNames[_currentShaderIdx] << endl;
-      if (useTextures(true)) {
-         setupTexture(true, "Current");
-      } 
+
+      if (_textureFileNames.size() != 0) {
+         _textureFileNames.erase(_textureFileNames.begin(), _textureFileNames.begin() + 2);
+         if (useTextures(true)) {
+            setupTexture("Current");
+         } 
+      } else {
+         cout << "(No textures)" << endl;
+      }
+
       if (useCubemaps(true)) {
          setupCubemap(true, "Current");
       } 
-
-      _mesh = PLYMesh("../models/" + _modelNames[_currentModelIdx] + ".ply");
    }
 
    void setup() {
@@ -140,13 +146,18 @@ public:
             }
             cout << "\nPrevious model: " << _modelNames[_currentModelIdx] << endl;
          }
+         _mesh = PLYMesh("../models/" + _modelNames[_currentModelIdx] + ".ply");
          _radius = _viewVolumeSide;
          _azimuth = _elevation = 0;
          _textureFileNames = GetFilenamesInDir("../textures/" + _modelNames[_currentModelIdx], ".");
-         _mesh = PLYMesh("../models/" + _modelNames[_currentModelIdx] + ".ply");
-         if (useTextures(true)) {
-            setupTexture(true, "Current");
-         } 
+         if (_textureFileNames.size() != 0) {
+            _textureFileNames.erase(_textureFileNames.begin(), _textureFileNames.begin() + 2);
+            if (useTextures(true)) {
+               setupTexture("Current");
+            } 
+         } else {
+            cout << "(No textures)" << endl;
+         }
          if (useCubemaps(false)) {
             setupCubemap(false, "Current");
          }
@@ -154,13 +165,13 @@ public:
          _currentShaderIdx = (_currentShaderIdx + 1) % _shaderNames.size();
          cout << "Next shader: " << _shaderNames[_currentShaderIdx] << endl;
          if (useTextures(true)) {
-            setupTexture(false, "Current");
+            setupTexture("Current");
          } else if (useCubemaps(true)) {
             setupCubemap(false, "Current");
          } 
       } else if (key == GLFW_KEY_T) {
          if (useTextures(true)) {
-           setupTexture(false, "Next");
+           setupTexture("Next");
          }
       } else if (key == GLFW_KEY_C) {
          if (useCubemaps(true)) {
@@ -193,8 +204,8 @@ public:
       float windowY = abs(minBounds[1]) + (maxBounds[1]);
       float windowZ = abs(minBounds[2]) + (maxBounds[2]);
       float maxDimension = std::max(std::max(windowX, windowY), windowZ);
-
-      renderer.scale(vec3(_viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension, _viewVolumeSide / maxDimension));
+      float scaleFactor = _viewVolumeSide / maxDimension;
+      renderer.scale(vec3(scaleFactor, scaleFactor, scaleFactor));      
 
       float centroidX = (minBounds[0] + maxBounds[0]) / 2.0f;
       float centroidY = (minBounds[1] + maxBounds[1]) / 2.0f;
@@ -283,11 +294,11 @@ public:
 
    bool useTextures(bool printOut) {
       if (_shaderNames[_currentShaderIdx] == "texture") {
-         if (_mesh.hasUV() && _textureFileNames.size() != 0) {
+         if (_textureFileNames.size() != 0 && _mesh.hasUV()) {
             return true;
          } else {
             if (printOut) {
-               cout << "(No textures)" << endl;
+               cout << "(No uvs)" << endl;
             }
             return false;
          }
@@ -296,15 +307,11 @@ public:
       }
    }
 
-   void setupTexture(bool cleanUp, string adjective) {
-      if (cleanUp) {
-         // clean up GetFilenamesInDir() output
-         _textureFileNames.erase(_textureFileNames.begin(), _textureFileNames.begin() + 2);
-      }
-      cout << adjective << " texture: " << _textureFileNames[_currentTextureIdx] << endl;
+   void setupTexture(string adjective) {
       if (adjective == "Next") {
          _currentTextureIdx = (_currentTextureIdx + 1) % _textureFileNames.size();
       }
+      cout << adjective << " texture: " << _textureFileNames[_currentTextureIdx] << endl;
       renderer.loadTexture(_textureFileNames[_currentTextureIdx], "../textures/" + _modelNames[_currentModelIdx] + "/" + _textureFileNames[_currentTextureIdx], 0);
    }
 
@@ -324,13 +331,10 @@ public:
    }
 
    void setupCubemap(bool cleanUp, string adjective) {
-      if (cleanUp) {
-         _textureFileNames.erase(_textureFileNames.begin(), _textureFileNames.begin() + 2);
-      }
-      cout << adjective << " cubemap: " << _cubemapNames[_currentCubemapIdx] << endl;
       if (adjective == "Next") {
          _currentCubemapIdx = (_currentCubemapIdx + 1) % _cubemapNames.size();
       }
+      cout << adjective << " cubemap: " << _cubemapNames[_currentCubemapIdx] << endl;
       renderer.loadCubemap("cubemap", "../cubemaps/" + _cubemapNames[_currentCubemapIdx], 1);
    }
 

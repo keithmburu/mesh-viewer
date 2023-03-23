@@ -22,7 +22,7 @@ void main()
   vec3 y = normalize(cross(z, x));
   mat3 R = mat3(x, y, z);
 
-  // vec3 eyePos = R * Size * (vPosition - vec3(0.5, 0.5, 0.0)) + Offset;
-  vec3 eyePos = R * Size * vPosition + Offset;
+  vec3 eyePos = R * Size * (vPosition - vec3(0.5, 0.5, 0.0)) + Offset;
+  // vec3 eyePos = R * Size * vPosition + Offset;
   gl_Position = MVP * vec4(eyePos, 1.0); 
 }

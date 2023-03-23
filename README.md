@@ -110,6 +110,16 @@ mesh-viewer/build $ ../bin/mesh-viewer
     <img src="results/tommygun-ripple.gif" width="200" style="flex:1;">
 </div>
 
+## Key Bindings
+
+- Next model - N
+- Previous model - P
+- Next shader - S
+- Next texture - T
+- Next cubemap - C
+- Toggle animated light - L
+- Toggle animated camera - E
+- Screenshot - X
 
 ## Credits
 

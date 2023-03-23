@@ -5,6 +5,7 @@ layout (location = 1) in vec3 vNormals;
 layout (location = 2) in vec2 vUVs;
 
 uniform mat4 MVP;
+uniform mat4 ModelMatrix;
 uniform bool UseTextures;
 
 out vec2 uv;
