@@ -182,6 +182,7 @@ public:
       } else if (key == GLFW_KEY_E) {
          _animatedEye = !_animatedEye;
       } else if (key == GLFW_KEY_X) {
+         srand(elapsedTime());
          screenshot("../results/" + _modelNames[_currentModelIdx] + "-" + _shaderNames[_currentShaderIdx] + "-" + std::to_string(rand() % 10000) + ".png");
       } 
       if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {

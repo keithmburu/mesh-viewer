@@ -10,7 +10,7 @@ out vec4 FragColor;
 void main()
 {
   if (useTextures == 1) {
-    FragColor = texture(textureImg, uv);
+    FragColor = texture(textureImg, uv * vec2(1, -1));
   } else {
     FragColor = vec4(1.0, 1.0, 1.0, 1.0);
   }

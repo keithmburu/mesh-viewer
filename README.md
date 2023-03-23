@@ -77,8 +77,8 @@ mesh-viewer/build $ ../bin/mesh-viewer
 </div>
 4. Textures
 <div style="display:flex;">
-    <img src="results/concrete-bags-texture-9383.png" width="200" style="flex:1;">
-    <img src="results/footstool-texture-886.png" width="200" style="flex:1;">
+    <img src="results/full-body-texture-9383.png" width="200" style="flex:1;">
+    <img src="results/footstool-texture-9383.png" width="200" style="flex:1;">
 </div>
 5. Polka Dot shading + Skybox
 <div style="display:flex;">
@@ -123,16 +123,12 @@ mesh-viewer/build $ ../bin/mesh-viewer
 
 ## Credits
 
-### Models
-
 - "Puss In Boots | Puss In Boots: The Last Wish" (https://skfb.ly/oEQJB) by Sonic Plush Universe is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - "[REMAKE] - Leather Footstool" () by RaynaudL is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - "Concrete bags and pallet" (https://skfb.ly/oELFo) by neverfollow81 is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - "Silver Crafts-Freepoly.org" (https://skfb.ly/oELWo) by Freepoly.org is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-- "Cat with jet pack" (https://skfb.ly/oELNA) by Muru is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - "Full body scan" (https://skfb.ly/oELNA) by Artec 3D is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - "Measuring tape" (https://skfb.ly/oELNA) by Artec 3D is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - "Face" (https://www.artec3d.com/3d-models/face) by Artec 3D is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-- "Forest Background - panorama" (https://www.cleanpng.com/png-equirectangular-projection-3d-computer-graphics-de-4995986/download-png.html) by Avadu
 - "Sea cubemap" (https://learnopengl.com/Advanced-OpenGL/Cubemaps)
-
+- "Forest Background - panorama" (https://www.cleanpng.com/png-equirectangular-projection-3d-computer-graphics-de-4995986/download-png.html) by Avadu
